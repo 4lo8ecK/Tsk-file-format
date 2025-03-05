@@ -4,16 +4,17 @@ Created for my own use.
 
 ## The file structure:
 ```
-[METADATA]
-format version
-key for encrypting
-username
-file creation date
-file last edit date
-type of the task (important, default...)
-[MAIN-PART]
-title of the task
-text of the task (to EOF)
+1. [METADATA]
+2.   format version
+3.   key for encrypting
+4.   username
+5.   file creation date
+6.   file last edit date
+7.   type of the task (important, default...)
+
+8. [MAIN-PART]
+9.   title of the task
+10.  text of the task (to EOF)
 ```
 
 _'key for encrypting'_ encrypts only **Main Part** of file.
