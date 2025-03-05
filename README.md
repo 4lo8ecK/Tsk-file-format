@@ -2,7 +2,7 @@
 Header-only lib for creating, editing and readin '.tsk' file.
 Created for my own use.
 
-###The file structure:
+## The file structure:
 ```
 [METADATA]
 format version
