@@ -1,8 +1,8 @@
 # Tsk-file
-**Header-only** lib for creating, editing and readin `.tsk` file.
+**Header-only** lib for creating, editing and reading `.tsk` file.
 Created for my own use.
 
-## The file structure:
+### The file structure:
 ```
 1. [METADATA]
 2.   format version
