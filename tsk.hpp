@@ -31,51 +31,50 @@
 
 #define EXTENCION ".tsk"  // Task-file Extencion
 
-#define VER 0.1     // Version of the file format '0.1' - task-text is not encrypted, '0.2' - task-text is encrypting using 'xor' (change this value if something global is changed and it will work only using new version, but it have to be able to open and edit old versions of format)
+#define VER 0.1           // Version of the file format '0.1' - task-text is not encrypted, '0.2' - task-text is encrypting using 'xor' (change this value if something global is changed and it will work only using new version, but it have to be able to open and edit old versions of format)
+
+#define ENCODE_VER 1      // this vallue = VER*10
 
 #include <string>
-#include <ctime>
-
-#include <stdlib.h>
 
 namespace tsk{
 
 
         #pragma region Types defineings for working with Task files 
         // defineings of special data types
-        typedef struct {
+        struct flDate{
                 int day;
                 int month;
                 int year;
 
                 flDate set(int _Day, int _Mon, int _Year){
-                        day = _Day;
-                        month = _Mon;
-                        year = _Year;
+                        day     = _Day;
+                        month   = _Mon;
+                        year    = _Year;
                 }
-                string str(){
+                std::string str(){
                         return{
-                                to_string(day)+"."+
-                                to_string(month)+"."+
-                                to_string(year)
+                                std::to_string(day)     +"."+
+                                std::to_string(month)   +"."+
+                                std::to_string(year)
                         };
                 }
-                flDate to_date(string _date){
+                flDate to_date(std::string _date){
                         std::string _day, _mon, _year;
 
-                        _day = _date.substr(0, 1);
-                        _mon = _date.substr(3, 4);
-                        _year = _date.substr(6, 9);
+                        _day    = _date.substr(0, 1);
+                        _mon    = _date.substr(3, 4);
+                        _year   = _date.substr(6, 9);
 
-                        day = atoi(_day.c_str());
-                        month = atoi(_mon.c_str());
-                        year = atoi(_year.c_str());
+                        day     = atoi(_day.c_str());
+                        month   = atoi(_mon.c_str());
+                        year    = atoi(_year.c_str());
 
                 }
 
-        } flDate;
+        };
 
-        typedef struct {
+        struct flMetadata {
                 std::string     version = std::to_string(VER);
                 std::string     key;
                 std::string     username;
@@ -83,7 +82,7 @@ namespace tsk{
                 flDate          last_edit_date;
                 std::string     tasktype;
 
-                string to_str(){
+                std::string to_str(){
                         return {
                                 username                + '\n' +
                                 creation_date.str()     + '\n' +
@@ -121,17 +120,17 @@ namespace tsk{
                         tasktype        = input;
                 }
 
-        } flMetadata;
+        };
         
         // such type for text
         // maybe in future will be added more things
-        typedef struct {
+        struct flText {
                 std::string     title;
                 std::string     saved_text;
                 
                 // functions
 
-                string to_str(){
+                std::string to_str(){
                         return {
                                 title + '\n' +
                                 saved_text
@@ -143,25 +142,25 @@ namespace tsk{
                         std::string     Text
                 )
                 {
-                        title = Title;
-                        saved_text = Text;
+                        title           = Title;
+                        saved_text      = Text;
                 }
                 
                 flText setText(std::string Text){
-                        saved_text = Text;
+                        saved_text      = Text;
                 }
                 flText setTitle(std::string Title){
-                        title = Title;
+                        title           = Title;
                 }
 
-        } flText;
+        } ;
 
         // main task structure 
-        typedef struct{
+        struct flTask{
                 flMetadata      metadata;
                 flText          text;
 
-                string to_str(){
+                std::string to_str(){
                         return {
                                 metadata.to_str()       + '\n' +
                                 text.to_str()
@@ -174,7 +173,7 @@ namespace tsk{
                         metadata        = MetaData;
                         text            = Text;
                 } 
-        } flTask;
+        };
         #pragma endregion
 
         class Task{
@@ -183,9 +182,19 @@ namespace tsk{
                 // .tsk file type structure as data type:
                 // such type for metadata
 
-        public:
+        private:
+                std::string SavePath            = "/";  // as default data saves in executable's dir
+                std::string TasksFolderName     = "/tsks/";
 
-                
+        public:
+                Task set_path(std::string _Path){
+                        SavePath        = _Path;
+                }        
+                void SetPath(std::string _Path){
+                        SavePath        = _Path; 
+                }
+
+
                 void SaveToTskFile(const std::string& input_dat);
                 void SaveToTskFile(const flTask& input_dat);
 
@@ -195,5 +204,3 @@ namespace tsk{
                 void ReadFromTskFile(const std::string& input_dat, flTask& data);
         };
 }
-
-
