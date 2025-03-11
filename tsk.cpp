@@ -1,4 +1,4 @@
-#include "tsk.h"
+#include "tsk.hpp"
 
 #include <string>       // for string
 #include <sstream>
@@ -16,6 +16,10 @@ namespace tsk{
 #define METADATA_REGION_BEGIN   "[METADATA]"    // 'Header' of metadata in task-file 
 #define MAIN_PART_REGION_BEGIN  "[MAIN-PART]"   // 'Header' of main part in task-file 
 
+// If file version higher then editor's and it is not able to be opened 
+#define ERR_VER_TITLE_TEXT "Uncnown version"
+#define ERR_VER_TEXT_TEXT "File version is unknown, it's unable to read it\nVersion is higher then expected\nCurrent version - "
+
 #pragma region Protection of data
 
 // to generate a KEY gets a hash of input parameter
@@ -25,6 +29,28 @@ string generKey(const string& parameter_for_KEY_generating){
         return          std::to_string(hashed).std::string::substr(0, 16);
 }
 
+#if ENCODE_VER == 1 // do not uses any encryption
+
+string encryptData(const string& input){
+        return          input;
+}
+string decryptData(const string& input, const string& key){
+
+        return          input;
+}
+
+#elif ENCODE_VER == 2 // uses an XOR encryption
+
+string encryptData(const string& input, string KEY){
+        int             input_length    = input.length();
+        int             lenght_of_key   = 16;
+        string          result;
+        
+        for (int i = 0; i < input_length; i++ ){
+                result[i]       = input[i] ^ KEY[i % lenght_of_key];
+        }
+        return          result;
+}
 
 string encryptData(const string& input){
         int             input_length    = input.length();
@@ -37,16 +63,32 @@ string encryptData(const string& input){
         }
         return          result;
 }
-string encryptData(const string& input, string KEY){
-        int             input_length    = input.length();
-        int             lenght_of_key   = 16;
-        string          result;
 
-        for (int i = 0; i < input_length; i++ ){
-                result[i]       = input[i] ^ KEY[i % lenght_of_key];
-        }
+string decryptData(const string& input, const string& KEY){
+        return encryptData(input, KEY);
+}
+
+#elif ENCODE_VER == 3 // uses an AES encryption
+
+string encryptData(const string& input){
+        string result;
         return          result;
 }
+string decryptData(const string& input){
+        string result;
+        return          result;
+}
+
+#else // do not uses any enryption
+
+string encryptData(const string& input){
+        return          input;
+}
+string decryptData(const string& input){
+        return          input;
+}
+
+#endif
 
 #pragma endregion
 
@@ -72,18 +114,15 @@ void saveIntoFile(string name, string data){
 void saveFile(string name, string metaData, string mainPart){
         string mainData;
 
-        if (VER == 0.1){
-                mainData = mainPart;
-        }
-        if (VER == 0.2){
-                mainData = encryptData(mainPart);
-        }
-
+#if ENCODE_VER == 1
+        mainData = mainPart;
+#else
+        mainData = encryptData(mainPart);
+#endif
         string _Data =  METADATA_REGION_BEGIN   + metaData + 
                         MAIN_PART_REGION_BEGIN  + mainData;
-        
-        saveIntoFile(name, _Data);
 
+        saveIntoFile(name, _Data);
 }
 
 void saveFile(string name, flMetadata metaData, flText mainPart){
@@ -120,7 +159,14 @@ flMetadata ReadMetaData(stringstream& file){
                 }
         }
 
-        metadata.setMetadata(lns[0], lns[1],lns[2],lns[3],lns[4],lns[5]);
+        metadata.setMetadata(
+                lns[0],
+                lns[1],
+                lns[2],
+                lns[3],
+                lns[4],
+                lns[5]
+        );
         return metadata;
 }
 
@@ -130,41 +176,52 @@ flText ReadMainPart(stringstream& file, string _key, int _version){
 
         string _inp_file;
         if (_version == 0.1){
-               _inp_file = file.str(); 
-        } 
-        if (_version == 0.2){
-                _inp_file = encryptData(file.str(),_key);
+                _inp_file = file.str(); 
         }
-
-        stringstream _file;
-        _file << _inp_file;
-
-        string line;
-        while(getline(_file, line)){
-                if(line != MAIN_PART_REGION_BEGIN){
-                        continue;
-                }
-                if(line == MAIN_PART_REGION_BEGIN){
-                        continue;
-                }
-                else{
-                        lines.push_back(line);
-                }
+#if ENCODE_VER > 1
+        else {
+                _inp_file = decryptData(file.str(), _key);
         }
-
-        string _title;
-        string _text;
-
-        _title = lines[0];
-        _text = "";
+#endif
+        if (_version <= VER){
+                stringstream _file;
+                _file << _inp_file;
         
-        for (int i = 1; i < lines.size(); i++){
-                _text += lines[i] + "\n";
+                string line;
+                while(getline(_file, line)){
+                        if(line != MAIN_PART_REGION_BEGIN){
+                                continue;
+                        }
+                        if(line == MAIN_PART_REGION_BEGIN){
+                                continue;
+                        }
+                        else{
+                                lines.push_back(line);
+                        }
+                }
+        
+                string _title;
+                string _text;
+        
+                _title = lines[0];
+                _text = "";
+                
+                for (int i = 1; i < lines.size(); i++){
+                        _text += lines[i] + "\n";
+                }
+        
+                text.setTitle(_title);
+                text.setText(_text);
+        
         }
-
-        text.setTitle(_title);
-        text.setText(_text);
-
+        else {
+                string ErrText = 
+                ERR_VER_TEXT_TEXT               + to_string(VER) + 
+                "\nFile format version - "      + to_string(_version);
+                
+                text.setTitle(ERR_VER_TITLE_TEXT);
+                text.setText(ErrText);
+        }
         return text;
 }
 
