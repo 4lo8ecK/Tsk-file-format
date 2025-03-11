@@ -125,6 +125,16 @@ string AESData(const string& input, const string& KEY){
         // need to be writed an AES ecryption solution
         return result;
 }
+
+string unXORData(const string& input, const string& KEY){
+        return XORData(input, KEY);
+}
+
+string unAESData(const string& input, const string& KEY){
+        return "nothing"; // not written :)
+}
+
+
 #endif
 
 #pragma endregion

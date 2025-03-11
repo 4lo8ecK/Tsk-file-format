@@ -37,6 +37,23 @@
 
 namespace tsk
 {
+        #pragma region Functions and methods of tsk namespace
+
+        // work with files
+        bool DirExist(const string& path);
+        void saveIntoFile(string name, string data);
+
+        // encryption
+        string getHash(const string& parameter_for_KEY_generating);
+
+        string XORData(const string& input, const string& KEY);
+        string unXORData(const string& input, const string& KEY);
+        
+        string AESData(const string& input, const string& KEY);
+        string unAESData(const string& input, const string& KEY);
+
+
+        #pragma endregion
 
         #pragma region Types defineings for working with Task files 
         // defineings of special data types
