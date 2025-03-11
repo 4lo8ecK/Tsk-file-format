@@ -29,16 +29,13 @@
 
 #pragma onse
 
-#define EXTENCION ".tsk"  // Task-file Extencion
-
-#define VER 0.1           // Version of the file format '0.1' - task-text is not encrypted, '0.2' - task-text is encrypting using 'xor' (change this value if something global is changed and it will work only using new version, but it have to be able to open and edit old versions of format)
-
-#define ENCODE_VER 1      // this vallue = VER*10
-
 #include <string>
 
-namespace tsk{
+#define EXTENCION ".tsk"  // Task-file Extencion
+#define VER 0.1                 // Version of the file format '0.1' - task-text is not encrypted, '0.2' - task-text is encrypting using 'xor' (change this value if something global is changed and it will work only using new version, but it have to be able to open and edit old versions of format)
+#define ENCODE_VER 2    // this vallue = VER*10 until 3
 
+namespace tsk{
 
         #pragma region Types defineings for working with Task files 
         // defineings of special data types
@@ -153,7 +150,7 @@ namespace tsk{
                         title           = Title;
                 }
 
-        } ;
+        };
 
         // main task structure 
         struct flTask{
@@ -181,26 +178,18 @@ namespace tsk{
 
                 // .tsk file type structure as data type:
                 // such type for metadata
-
-        private:
+#if 0
+        public:
                 std::string SavePath            = "/";  // as default data saves in executable's dir
                 std::string TasksFolderName     = "/tsks/";
-
+#endif
         public:
-                Task set_path(std::string _Path){
-                        SavePath        = _Path;
-                }        
-                void SetPath(std::string _Path){
-                        SavePath        = _Path; 
-                }
 
+                void SaveToTskFile(const flTask& input_dat); // to save new file
 
-                void SaveToTskFile(const std::string& input_dat);
-                void SaveToTskFile(const flTask& input_dat);
+                void EditTskFile(const std::string& _name, const flTask& input_dat); // to edit exist file
 
-                void EditTskFile(const std::string& input_dat);
-                void EditTskFile(const flTask& input_dat);
-
-                void ReadFromTskFile(const std::string& input_dat, flTask& data);
+                void ReadFromTskFile(const std::string& _name, flTask& data);
+                flTask ReadFromTskFile(const std::string& _name);
         };
 }
