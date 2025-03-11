@@ -303,6 +303,24 @@ flTask readFile(string name){
 #pragma region CLASS FUNCTIONS
 // it's kind of interface of lib. But it's not so
 
+vector<string> Task::FilesList() {
+        string path = TSK_FOLDER_PATH;
+	DirExist(path);
+	vector<string> files;
+
+	for (const auto& entry : directory_iterator(path)) {
+		if (entry.is_regular_file()) {
+			string filename = entry.path().filename().string();
+			size_t lastDot = filename.find_last_of(".");
+			if (lastDot != string::npos) {
+				filename = filename.substr(0, lastDot);
+			}
+			files.push_back(filename);
+		}
+	}
+	return files;
+}
+
 void Task::SaveToTskFile(const flTask& input){
         string _name = getHash(input.text.title);
         saveFile(_name, input.metadata, input.text);
@@ -312,12 +330,24 @@ void Task::EditTskFile(const std::string& _name, const flTask& input){
         saveFile(_name, input.metadata, input.text);
 }
 
+
 void Task::ReadFromTskFile(const std::string& name, flTask& data){
         data = readFile(name);
 }
+
 flTask Task::ReadFromTskFile(const std::string& name){
         return readFile(name);
 }
+
+bool Task::RemoveTskFile(const string& name){
+        string path = TSK_FOLDER_PATH + name;
+        if (remove(path)) {
+                Task::ReloadFilesList();
+                return 1;
+        }
+        return 0;
+}
+
 
 #pragma endregion
 }
